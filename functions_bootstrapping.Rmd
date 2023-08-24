@@ -1,0 +1,273 @@
+---
+title: "Untitled"
+author: "Savannah Weaver"
+date: "2023-04-06"
+output: html_document
+---
+
+
+
+# Packages
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+
+```{r}
+
+```
+
+Notes from Tues 4/11 lecture:
+
+- cntrl+option+i = insert code chunk
+- cntrl+shift+m = insert pipe
+- cntrl+shift+1/2/3/4 to zoom in and out of different panes
+- naming chunks is helpful bc you can then click on them, like the outline 
+- janitor pkg for cleaning up column names etc
+- read_csv loads a tibble, while read.csv loads as a dataframe
+
+
+
+# Part 1: QQ Plot Function
+
+https://www.youtube.com/watch?v=n4-ZiJq_nSA
+
+
+Background: Q-Q Plots
+A Q-Q (Quantile-Quantile) Plot is a way of checking if two collections of observations come from the same distribution.
+
+The steps are as follows:
+
+Take two vectors of the same length, x and y.
+
+Put the vectors in order from largest to smallest.
+
+Pair the ordered vectors up, so that the smallest value of x is paired with the smallest value of y, and so on.
+
+Make a scatterplot of the ordered pairs.
+
+If the points in the scatterplot fall on a straight line, with intercept 0 and slope 1, this suggests that x and y are sampled from the same distribution.
+
+In this section, you will use a Q-Q Plot to check if a vector of values x comes from a Normal distribution.
+The approach is to randomly generate a new vector y from a Normal distribution with the same mean and standard deviation as x, then to create a Q-Q plot of x and y. (Note: A typical Normal Q-Q plot uses theoretical quantiles instead of randomly generated values. We're taking a bit of a shortcut in this assignment.)
+
+Write a function (100 points)
+Your final function should take as input a numeric vector.
+
+It should return (not just print!) a Q-Q Plot comparing your input to Normally distributed values.
+
+You may not use any existing functions specific to Q-Q plots; including (but not limited to) qqplot(), geom_qq, or stat_qq.
+
+Demonstrate that your function works by running it on either real data of your choice, or on a non-Normal vector that you create.
+
+
+
+create a normal distribution of length n:
+
+```{r}
+rnorm(10, # n
+      50 # mean around which dist is set
+      # can also do SD, but we will leave as default
+      )
+```
+
+
+
+
+also have a random list of (normally I guess) distributed values:
+
+```{r}
+example_dist <- rnorm(20, 30)
+example_dist
+sort(example_dist)
+```
+
+
+plot:
+
+```{r}
+ggplot() + 
+  geom_point(aes(x = example_dist, # make this the normal distribution
+                 y = example_dist # make this the comparison one
+                 )) +
+  theme_classic() +
+  # add labels
+  xlab("Normal Distribution") +
+  ylab("Your Data") +
+  ggtitle("QQ Plot")
+```
+
+
+load a comparison dataset:
+
+```{r}
+iris
+```
+
+
+
+## Put it all into the function
+
+This function takes a vector of numbers, compares it to a normal distribution, then returns a comparison plot, AKA a Q:Q plot. One assumption is that it expects a vector (vs a dataframe or tibble).
+
+
+*notes*:
+
+- instead of writing the function in a code chunk, it might be better to write it in a separate R file
+- then, use function source("R script filename") to basically run everything in that script, to give you the function saved there!
+
+```{r}
+QQ_plot_my_func <- function(dist_compare) {
+  
+  # first create a comparison normal distribution
+  # NOTE: could have saved the values I pass to rnorm beforehand,
+  #   that way the functions are not nested within the rnorm function
+  reference_norm <- rnorm(length(dist_compare), # number of points needed
+                          mean(dist_compare), # mean around which dist is set
+                          sd(dist_compare) # sd around which dist is set 
+                                           # (this centers it on the 1:1 comparison line)
+                          )
+  
+  # order both least to greatest & pair
+  comp_df <- tibble(refs_ordered = sort(reference_norm),
+                    yours_ordered = sort(dist_compare))
+  
+  # then plot them
+  ggplot(comp_df) + 
+    geom_point(aes(x = refs_ordered, # make this the normal distribution
+                   y = yours_ordered # make this the comparison one
+                   )) +
+    theme_classic() +
+    # add labels
+    xlab("Normal Distribution") +
+    ylab("Your Data") +
+    ggtitle("QQ Plot") +
+    # add a reference line
+    geom_abline(slope = 1, intercept = 0,
+                linetype = "dashed", alpha = 0.5) -> plot
+  
+  plot # don't need to explicitly state "return"
+  # for ex, return(plot) # might be easier to SEE "return" when looking at function
+  
+}
+```
+
+corrections to my function:
+
+- 
+
+
+
+
+
+try it:
+
+```{r}
+QQ_plot_my_func(iris$Sepal.Width)
+```
+
+
+
+
+
+
+# Part 2
+
+
+Bootstrapping is the only part of this example I do not know well, but I need to review first.
+
+Oftentimes, coding starts at the end: Where do I want to end up, and how do I get there?
+
+
+
+## BOOTSTRAPPING
+
+https://www.youtube.com/watch?v=IPQaqi6rP0o
+
+function notes
+
+- replicate() repeats what you tell it to, over and over
+- 
+```{r}
+# usually, create a function
+# input can be a vector or a df
+my_boot_mean <- function(vect) {
+  
+  # replicate sampling of the dataset
+  replicate(100, # number of obs in a resample (NOT how many samples)
+            sample(dat$col, nrow(dat), replace = TRUE) # what we want to resample from
+            ) -> reps
+  
+  apply(reps, 2, # 2 = ?
+        funct to do across bootreps)
+}
+
+
+
+# tidy_boots is a tibble OF the resamples = VERY nested structure
+# literally creates a CLASS called resample that remembers what df it came from
+tidy_boots <- bootstrap(df, # give it the whole dataframe
+                        100 # number of times it is resampled
+                        )
+
+# but how do I decide how BIG a resample is?
+
+# then aply
+map(tidy_boots,
+    function(x),
+    func(df$col)
+    )
+```
+
+
+
+
+
+try bootstrapping on the iris dataset to get the mean Sepal.Length
+
+```{r}
+# dataset
+head(iris)
+
+# pkg for tidyverse version of bootstrapping
+library(tidymodels)
+
+# create resamples
+iris_boots <- bootstraps(iris, # dataframe
+                         times = 10 #number of samples
+                         )
+
+# create a function for a SLR of Sepal.Length ~ Sepal.Width
+my_lm <- function(resamp_df) {
+  
+  lm <- lm(data = resamp_df, Sepal.Length ~ Sepal.Width)
+  
+  slopes <- coefficients(lm)[2]
+  
+  slopes
+}
+
+# then apply function to each sample
+boot_models <-
+  iris_boots %>% 
+  mutate(model_slope = map(splits, my_lm))
+
+# then have to somehow get mean & CI
+# this does not work
+# mean(boot_models$model_slope)
+```
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,102 @@
+---
+title: "random notes"
+author: "Savannah Weaver"
+date: "2023-04-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(leaflet)
+library(gganimate)
+library(plotly)
+library(ggmap)
+```
+
+
+
+
+
+
+
+
+## rmd pro
+
+in the code chunk name ({r}), if you add cache=TRUE, then it will save things, and reuse it unless you change the code that made it - **BUT** if you edit things elsewhere in the doc and not in the cached chunk, then the cache chunk won't know to update... a source of hidden errors and heartbreak 
+
+
+
+
+# Interactive Mapping!!!
+
+
+leaflet and plotly use this thing called reactjs, which allows images to react to your mouse - VS - Shiny apps use R code to allow things to be interactive to the user
+
+
+## gganimate 
+
+gganimate is nice bc you can just add it to an existing ggplot
+AND works anywhere that you could put a gif (like scientific presentations!)
+also need to be able to make gifs on your computer (i.e. gifski pkg)
+usually use "transition_states()"
+then, after adding that geom, you run the plot object through the animate() function, which also has some settings that can be made:
+
+animate(
+plot_object_name,
+nframes = n
+)
+
+
+## plotly
+
+this gives an object type of **html widget** - not something that works to save as an image that can go in Word or PDF... BUT, the pro is that it can be interactive - for example, in Shiny! because it's super easy to hover over things to see more info :)
+
+
+```{r}
+iris %>%
+  plot_ly(x = ~Species,
+          y = ~Sepal.Length,
+          color = ~Species,
+          type = "box") %>% # note that we PIPE bc add new function, not adding gg layer
+  # add extra things for hoverng over
+  add_trace(x = ~Species, # for what 
+            mode = "markers", # how get popup
+            name = ~Species # what to pop up
+            )
+```
+
+
+
+
+
+
+## leaflet
+
+oftentimes, if we want interactive things, we specifically want it for a **MAP**!
+
+leaflet structure is more similar to ggplot than plotly, but still use pipes instead of pluses
+
+```{r}
+iris_map <- iris %>%
+  mutate(randomize = rnorm(nrow(.)),
+         lats = 35.2828 + randomize,
+         longs = -120.6596 + randomize
+         ) 
+
+leaflet() %>%
+  addTiles() %>%
+  addMarkers(lat = iris_map$lats, lng = iris_map$longs, popup = iris_map$Species)
+
+#^LOL
+
+
+
+
+leaflet() %>%
+  # automatically get all the boundaries of the world continents, countries, etc
+  addTiles() %>%
+  # can add pins/markers with lat and lng
+  addMarkers(lat = 35.2828, lng = -120.6596, 
+             popup = "Madonna" # popup when you click on it
+             )
+```

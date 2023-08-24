@@ -1,0 +1,166 @@
+---
+title: "A Guide to Data Wrangling in R"
+author: "Savannah Weaver"
+output: html_document
+---
+
+
+
+# Packages
+
+In every R document, the first thing to do is always load the packages that will be used. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+`%nin%` = Negate(`%in%`) # potentially helpful for filtering
+library(tidyverse) # workflow and plots
+library(rmdformats) # clean html R markdown format
+```
+
+
+
+
+
+# Introduction
+
+This guide will explain how to load, wrangle/clean, and export a dataset. Data "wrangling" or "cleaning" refers to putting data in the correct format for the visualization and statistics required. For my project workflows, I like to have one document where I load in all the data and clean it, then I export the cleaned dataset for analysis in a separate document. These guides will follow the same workflow.
+
+This guide will assume that you are an R-beginner. I recommend you read this guide on the tidyverse workflow before using my guides: [Tidyverse Style Guide](https://style.tidyverse.org/).
+
+
+note: try to intersperse text rather thank making big blocks
+For everything in R, you need "tidy" data. 
+
+
+protip: when trying to figure out how to do something, look up a **tutorial** or **example** rather than the documentation of the pkg/function
+
+
+
+
+# Loading Files
+
+In both cases read_csv() uses the first line of the data for the column names, which is a very common convention. There are two cases where you might want to tweak this behaviour:
+
+Sometimes there are a few lines of metadata at the top of the file. You can use skip = n to skip the first n lines; or use comment = "#" to drop all lines that start with (e.g.) #.
+
+from remotes pkg:
+install_github("username/reponame")
+
+
+
+
+dplyr wrangling (explain pipe)
+use cntrl+shift+m to type pipe!!! :D
+
+Using the five main dplyr verbs:
+
+filter()
+
+arrange()
+
+select()
+
+mutate()
+
+summarize()
+
+Using group_by() to perform groupwise operations
+
+Using at least a few other dplyr verbs for more nuanced tasks
+
+
+
+
+**Order of operations of above**
+
+- always drop rows first to get rid of data you won't use
+
+
+
+
+
+**QUESTIONS**
+
+- how do you decide what to code in the document and what to put in the console?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# review I need to do
+
+- regular expessions?
+
+- str_R / stringR?
+- ex: str_detect(col, "case") finds matches to case *within* the strings in that col
+- str_extract does the same thing^ but *saves* the matching portion
+
+
+in case when, as a last line, "TRUE ~" basically says otherwise/if not caught by prev conditions, then ~ make it this.
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,471 @@
+---
+title: "data viz!"
+author: "Savannah Weaver"
+output: 
+  rmdformats::html_clean:
+    highlight: tango
+    thumbnails: FALSE
+    toc: TRUE
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) # workflow and plots
+library(rmdformats) # clean html R markdown format
+```
+
+
+
+
+# Background
+
+This is dedicated to Robin, Brandon, and Tess, with thanks to Calvin for being my very first guinea pig. :)
+
+After frequently looking at other people's R code to help them create figures, I am creating a sort of guide of what I think are the most commonly-needed figure components in biology. I am creating this guide with the hopes of helping as many others as I can, given that I can't sit and code with everyone for hours, no matter how much I want to. That said, please do not hesitate to contact me at savannahjweaver@gmail.com to ask questions, suggest additions/edits to this guide, or to show me what I've helped you create!
+
+
+
+# Introduction
+
+We all want beautiful, informative figures for papers and presentations. The goal of this guide is to show how straightforward such beautiful figures can be. We'll start with the basic essentials of any plot, also known as the "grammar of graphics". I recommend spending time on that section regardless of your goals, because it will help you understand what follows: all the bagillion ways I like to custimize and beautify my plots.
+
+
+
+
+
+# Grammar of Graphics
+
+Every plot needs the following:
+
+1. Geometry: What type of plot should be created? Points? Lines? Error bars? The most informative scientific figures often have several geometries plotted. 
+
+2. Aesthetics/Mapping: What variables are involved, and in what configuration? Plots show the distribution of at least one variable (like a histogram), but could show many with x, y, color, and shape. Notice that the geometry and aesthetics are somewhat intertwined.
+
+3. Data: You need to plot the actual values of things!
+
+
+## ggplot
+
+The best way by far (fight me) to plot figures is to use ggplot, literally named for "grammar of graphics plots". This lies within the tidyverse (the best way to R; see my data wrangling guide), all created by Hadley Wickham. 
+
+For plotting, I solely use ggplot features and extensions, and that is what will be covered in this guide. 
+
+
+
+
+
+# The Basics
+
+Create a ggplot!
+
+```{r}
+ggplot()
+```
+
+We didn't actually use any grammar of graphics yet, did we?
+\n
+Let's start with geometry. Points! Notice that it is literally called "geom_", and you could add point, line, histogram, boxplot, or any one of numerous other options to it. 
+
+```{r}
+ggplot() +
+  geom_point()
+```
+
+We still have yet to actually plot anything... For data, we will use a built-in dataset called mtcars. Check it out to see what we could plot:
+
+```{r}
+head(mtcars)
+```
+
+
+So, we add the data to the ggplot, and add x and y "aethetics" to the point geometry.
+
+```{r}
+ggplot(data = mtcars) +
+  geom_point(aes(x = mpg,
+                 y = disp))
+```
+
+
+But, you could arrange your grammar of graphics in a multitude of ways, and still get the same outcome.
+\n
+For example, put the data in that specific geom. This is helpful for when you want to plot several dataframes on the same plot.
+
+```{r}
+ggplot() +
+  geom_point(data = mtcars,
+             aes(x = mpg,
+                 y = disp))
+```
+
+The aes can also be outside the geometry. But, this only makes sense if you only have one dataframe/set of aesthetics to plot.
+
+```{r}
+ggplot(data = mtcars) +
+  aes(x = mpg,
+      y = disp) +
+  geom_point()
+```
+
+Notice that when I list the different plot components, as well as the x and y variables, I put them on different lines. This makes it much more readable (for yourself as well as others) than having it in paragraph form. All of my code follows this format because I think it's easier to view, interpret, and edit.
+
+
+
+
+
+# Geometries & Aesthetics
+
+
+from R4DS:
+
+ggplot(data = <DATA>) + 
+  <GEOM_FUNCTION>(
+     mapping = aes(<MAPPINGS>),
+     stat = <STAT>, 
+     position = <POSITION>
+  ) +
+  <COORDINATE_FUNCTION> +
+  <FACET_FUNCTION>
+  
+  
+  
+  
+some funky things about ggplot:
+
+- there is no one "correct" place to put the aes (i.e. it can go within ggplot (applies to the whole plot), as it's own "+" statement (applies to the whole plot), OR within specific geoms (applies to only that geom, helpful if you need to plot several different dfs))
+
+
+
+
+
+things that can go in (or outside!) of aes:
+
+- color/fill
+- size
+- alpha
+- shape/linetype
+- "stroke"???
+- group (not always necessary)
+
+
+
+
+faceting!
+
+- facet_wrap(~ class, nrow = 2, ncol = 2)
+- facet_grid(drv ~ cyl) # does not have nrow/ncol arguments bc it uses the number of categories of the variables it's given
+- facet_grid(. ~ cyl)
+
+
+
+
+
+
+# Pretty-fying :D
+
+All *good* plots should:
+
+1. Be set to the correct scale.
+
+2. Have visually pleasing, widely interpretable colors.
+
+3. Provide enough information that it is impactful to the reader. 
+
+4. Be overall clean and enjoyable to look at. 
+
+
+
+## Scales
+
+Everything here refers to ggplot components named "scale_". These functions will help you tell ggplot exactly how you want each aesthetic to be plotted.
+
+
+### Axes
+
+The first scales to set are the x and y axes. Continuing our example from above, we can set the x axis scale. Compare before and after the changes, and fiddle with changing some of the values. 
+
+```{r}
+# basic
+ggplot(data = mtcars) +
+  geom_point(aes(x = mpg,
+                 y = disp))
+
+# with scales
+ggplot(data = mtcars) +
+  geom_point(aes(x = mpg,
+                 y = disp)) +
+  scale_x_continuous(limits = c(0,40), # set range limits for axis min/max
+                     breaks = c(0, 10, 20, 30, 40), # what numbers do we want tick marks at?
+                     labels = c("A", "B", 
+                                "C", "D", "E"), # change tick mark text... could be anything!
+                     name = "Miles per Gallon" # change axis title
+                     )
+```
+
+
+And, there are many scale options for other geometries/aesthetics.
+
+The most important other x/y scale is "discrete", for categorical data:
+
+```{r}
+ggplot(data = mtcars) +
+  geom_point(aes(x = factor(cyl),
+                 y = disp)) +
+  scale_x_discrete(labels = c("four", "six", 
+                              "eight"), # change tick mark text... could be anything!
+                     name = "Cylinders" # change axis title
+                     )
+```
+
+
+
+Scales can also be used for: color/fill, size of points or lines, the alpha (transparency) of any geometry, and the shape of points or type of lines. There may be others, but I find these most important. 
+
+- alpha
+- shape/linetype
+- "stroke"???
+- group
+
+
+
+
+coordinates
+
+- Turn a stacked bar chart into a pie chart using coord_polar().
+- coord_flip() switches the x and y axes
+
+
+sideways errorbars
+
+
+## Color
+
+- colors! :D
+  - color is for 1D objects
+  - fill is for 2D objects
+
+
+## Themes
+
+This will cover both 3 & 4 listed at the beginning of the pretty-fying section. 
+
+
+
+- themes
+  - annotations
+  - axis labels
+  - text font & size
+  - ex: theme_void gets rid of EVERYTHING except aes
+- statistics
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# themes
+
+SET the theme:
+
+theme_set(theme_gray(base_size = 20))
+
+everything that could possibly go in a theme:
+
+theme_gray
+function (base_size = 11, base_family = "") 
+{
+ half_line <- base_size/2
+theme(
+  line = element_line(colour = "black", size = 0.5, 
+                      linetype = 1, lineend = "butt"), 
+  rect = element_rect(fill = "white", colour = "black",
+                      size = 0.5, linetype = 1),
+  text = element_text(family = base_family, face = "plain",
+                      colour = "black", size = base_size,
+                      lineheight = 0.9,  hjust = 0.5,
+                      vjust = 0.5, angle = 0, 
+                      margin = margin(), debug = FALSE), 
+  
+  axis.line = element_blank(), 
+  axis.text = element_text(size = rel(0.8), colour = "grey30"),
+  axis.text.x = element_text(margin = margin(t = 0.8*half_line/2), 
+                             vjust = 1), 
+  axis.text.y = element_text(margin = margin(r = 0.8*half_line/2),
+                             hjust = 1),
+  axis.ticks = element_line(colour = "grey20"), 
+  axis.ticks.length = unit(half_line/2, "pt"), 
+  axis.title.x = element_text(margin = margin(t = 0.8 * half_line,
+                                          b = 0.8 * half_line/2)),
+  axis.title.y = element_text(angle = 90, 
+                              margin = margin(r = 0.8 * half_line,
+                                          l = 0.8 * half_line/2)),
+  
+  legend.background = element_rect(colour = NA), 
+  legend.margin = unit(0.2, "cm"), 
+  legend.key = element_rect(fill = "grey95", colour = "white"),
+  legend.key.size = unit(1.2, "lines"), 
+  legend.key.height = NULL,
+  legend.key.width = NULL, 
+  legend.text = element_text(size = rel(0.8)),
+  legend.text.align = NULL,
+  legend.title = element_text(hjust = 0), 
+  legend.title.align = NULL, 
+  legend.position = "right", 
+  legend.direction = NULL,
+  legend.justification = "center", 
+  legend.box = NULL, 
+  
+  panel.background = element_rect(fill = "grey92", colour = NA),
+  panel.border = element_blank(), 
+  panel.grid.major = element_line(colour = "white"), 
+  panel.grid.minor = element_line(colour = "white", size = 0.25), 
+  panel.margin = unit(half_line, "pt"), panel.margin.x = NULL, 
+  panel.margin.y = NULL, panel.ontop = FALSE, 
+  
+  strip.background = element_rect(fill = "grey85", colour = NA),
+  strip.text = element_text(colour = "grey10", size = rel(0.8)),
+  strip.text.x = element_text(margin = margin(t = half_line,
+                                              b = half_line)), 
+  strip.text.y = element_text(angle = -90, 
+                              margin = margin(l = half_line, 
+                                              r = half_line)),
+  strip.switch.pad.grid = unit(0.1, "cm"),
+  strip.switch.pad.wrap = unit(0.1, "cm"), 
+  
+  plot.background = element_rect(colour = "white"), 
+  plot.title = element_text(size = rel(1.2), 
+                            margin = margin(b = half_line * 1.2)),
+  plot.margin = margin(half_line, half_line, half_line, half_line),
+  complete = TRUE)
+}
+
+
+
+another custom theme:
+
+blue_theme <- function() {
+  theme(
+    # add border 1)
+    panel.border = element_rect(colour = "blue", fill = NA, linetype = 2),
+    # color background 2)
+    panel.background = element_rect(fill = "aliceblue"),
+    # modify grid 3)
+    panel.grid.major.x = element_line(colour = "steelblue", linetype = 3, size = 0.5),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.major.y =  element_line(colour = "steelblue", linetype = 3, size = 0.5),
+    panel.grid.minor.y = element_blank(),
+    # modify text, axis and colour 4) and 5)
+    axis.text = element_text(colour = "steelblue", face = "italic", family = "Times New Roman"),
+    axis.title = element_text(colour = "steelblue", family = "Times New Roman"),
+    axis.ticks = element_line(colour = "steelblue"),
+    # legend at the bottom 6)
+    legend.position = "bottom"
+  )
+}
+
+
+
+```{r}
+# start with "caveman" ggplot
+iris %>%
+  group_by(Species) %>%
+  summarise(mean_sepal_len = mean(Sepal.Length)) %>%
+  mutate(Species = forcats::fct_reorder(Species, # reorder the species factor
+                                        -mean_sepal_len) # reorder BY this value
+         ) %>%
+  ggplot(aes(x = Species, y = mean_sepal_len, label = Species)) +
+  geom_col() +
+  # add some themes
+  geom_text(nudge_y = 0.5) +
+  labs(title = "YAY",
+       x = NULL, # just as good as using element_blank!
+       y = "Mean Sepal Length") + 
+  theme(axis.ticks.x = element_blank())
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
